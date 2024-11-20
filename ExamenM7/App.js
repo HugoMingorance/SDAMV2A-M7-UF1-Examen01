@@ -1,44 +1,73 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, Button, Alert } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-// Importa las dependencias de navegación
+// Importa les dependències de Firebase
+import { db } from './utils/firebaseConfig'; // Assegura't que la configuració de Firebase estigui correcta
+import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+
+// Importa les dependències de navegació
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // Importa NovaTascaScreen
 import NovaTascaScreen from "./components/Screens/novaTascaScreen.js";
+import EditTascaScreen from "./components/Screens/editTascaScreen.js";
 
-// Define el stack de navegación
+// Define el stack de navegació
 const Stack = createNativeStackNavigator();
 
 // Pantalla inicial (HomeScreen)
 function HomeScreen({ navigation }) {
-  const [tasks, setTasks] = useState([
-    { id: "1", title: "ToDo1", date: "20/11/2024", completed: false },
-  ]);
+  const [tasks, setTasks] = useState([]);
 
-  // Elimina una tarea por su ID
+  // Recuperar tasques de Firestore
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "ToDoList"));
+        const tasksList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setTasks(tasksList);
+      } catch (error) {
+        console.error("Error recuperant tasques:", error);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  // Elimina una tasca per la seva ID
   const handleDelete = (id) => {
     Alert.alert(
-      "¿Estás segur de que vols eliminar la tasca?",  
-      "Perdràs totes les dades.",  
+      "¿Estás segur de que vols eliminar la tasca?",
+      "Perdràs totes les dades.",
       [
         {
           text: "Cancelar",
-          onPress: () => console.log("Acción cancelada"),
+          onPress: () => console.log("Acció cancel·lada"),
           style: "cancel"
         },
         { 
           text: "Acceptar", 
-          onPress: () => setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id))
+          onPress: async () => {
+            try {
+              await deleteDoc(doc(db, "ToDoList", id));
+              setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+              console.log("Tasca eliminada");
+            } catch (error) {
+              console.error("Error eliminant tasca:", error);
+            }
+          }
         }
       ],
       { cancelable: true }
     );
   };
 
-  // Alterna el estado de completado de una tarea
+  // Alterna l'estat de completat d'una tasca
   const toggleComplete = (id) => {
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
@@ -47,12 +76,23 @@ function HomeScreen({ navigation }) {
     );
   };
 
-  // Función para agregar una nueva tarea
-  const addTask = (title, date) => {
-    setTasks((prevTasks) => [
-      ...prevTasks,
-      { id: (prevTasks.length + 1).toString(), title, date, completed: false },
-    ]);
+  // Funció per afegir una nova tasca
+  const addTask = async (title, date) => {
+    try {
+      // Afegeix una nova tasca a Firestore
+      const docRef = await addDoc(collection(db, "ToDoList"), {
+        title,
+        date,
+        completed: false,
+      });
+      console.log("Tasca afegida correctament:", docRef.id);
+      setTasks((prevTasks) => [
+        ...prevTasks,
+        { id: docRef.id, title, date, completed: false },
+      ]);
+    } catch (error) {
+      console.error("Error afegint tasca:", error);
+    }
   };
 
   return (
@@ -87,9 +127,7 @@ function HomeScreen({ navigation }) {
       />
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() =>
-          navigation.navigate("NovaTascaScreen", { addTask })
-        }
+        onPress={() => navigation.navigate("NovaTascaScreen", { addTask })}
       >
         <Text style={styles.addButtonText}>+ Nova Tasca</Text>
       </TouchableOpacity>
@@ -113,12 +151,17 @@ export default function App() {
           component={NovaTascaScreen}
           options={{ animation: 'none', headerShown: false }}
         />
+        <Stack.Screen
+          name="EditTascaScreen"
+          component={EditTascaScreen}
+          options={{ animation: 'none', headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
-// Estilos
+// Estils
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -178,4 +221,3 @@ const styles = StyleSheet.create({
     color: "#999",
   },
 });
-
