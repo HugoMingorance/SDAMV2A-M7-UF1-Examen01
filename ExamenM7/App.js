@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Button } from "react-native";
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Button, Alert } from "react-native";
 import React, { useState } from "react";
 
 // Importa las dependencias de navegación
@@ -22,7 +22,22 @@ function HomeScreen({ navigation }) {
 
   // Elimina una tarea por su ID
   const handleDelete = (id) => {
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+    Alert.alert(
+      "¿Estás segur de que vols eliminar la tasca?",  
+      "Perdràs totes les dades.",  
+      [
+        {
+          text: "Cancelar",
+          onPress: () => console.log("Acción cancelada"),
+          style: "cancel"
+        },
+        { 
+          text: "Acceptar", 
+          onPress: () => setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id))
+        }
+      ],
+      { cancelable: true }
+    );
   };
 
   // Alterna el estado de completado de una tarea
