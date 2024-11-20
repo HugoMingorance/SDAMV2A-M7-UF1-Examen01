@@ -14,7 +14,6 @@ const Stack = createNativeStackNavigator();
 
 // Pantalla inicial (HomeScreen)
 function HomeScreen({ navigation }) {
-  // Lista de tareas (datos hardcodeados)
   const [tasks, setTasks] = useState([
     { id: "1", title: "ToDo1", date: "20/11/2024", completed: false },
     { id: "2", title: "ToDo2", date: "21/11/2024", completed: false },
@@ -33,6 +32,14 @@ function HomeScreen({ navigation }) {
         task.id === id ? { ...task, completed: !task.completed } : task
       )
     );
+  };
+
+  // Función para agregar una nueva tarea
+  const addTask = (title, date) => {
+    setTasks((prevTasks) => [
+      ...prevTasks,
+      { id: (prevTasks.length + 1).toString(), title, date, completed: false },
+    ]);
   };
 
   return (
@@ -61,7 +68,9 @@ function HomeScreen({ navigation }) {
       />
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("NovaTascaScreen")}
+        onPress={() =>
+          navigation.navigate("NovaTascaScreen", { addTask })
+        }
       >
         <Text style={styles.addButtonText}>+ Nova Tasca</Text>
       </TouchableOpacity>
