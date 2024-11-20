@@ -1,19 +1,21 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Platform } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function NovaTascaScreen({ route, navigation }) {
   const [title, setTitle] = useState("");
   const [deadlineEnabled, setDeadlineEnabled] = useState(false);
-  const [deadline, setDeadline] = useState("");
+  const [deadline, setDeadline] = useState(null);
+  const [showPicker, setShowPicker] = useState(false); // Controla si es mostra el date picker
 
   const { addTask } = route.params;
 
   const handleSave = () => {
-    if (title.trim() === "" || (deadlineEnabled && deadline.trim() === "")) {
+    if (title.trim() === "" || (deadlineEnabled && !deadline)) {
       alert("Has d'omplir tots els camps necessaris");
       return;
     }
-    addTask(title, deadlineEnabled ? deadline : "Sense data limit");
+    addTask(title, deadlineEnabled && deadline ? deadline.toLocaleDateString("ca-ES") : "Sense data limit");
     navigation.goBack(); // Regresa a la pantalla anterior
   };
 
@@ -38,12 +40,29 @@ export default function NovaTascaScreen({ route, navigation }) {
       </View>
 
       {deadlineEnabled && (
-        <TextInput
-          style={styles.input}
-          placeholder="Introdueix la data límit (dd/mm/aaaa)"
-          value={deadline}
-          onChangeText={setDeadline}
-        />
+        <>
+          <TouchableOpacity
+            style={styles.dateButton}
+            onPress={() => setShowPicker(true)}
+          >
+            <Text style={styles.dateButtonText}>
+              {deadline ? deadline.toLocaleDateString("ca-ES") : "Selecciona una data"}
+            </Text>
+          </TouchableOpacity>
+          {showPicker && (
+            <DateTimePicker
+              value={deadline || new Date()} // Data actual per defecte
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowPicker(Platform.OS === "ios"); // Manté el picker o l'oculta
+                if (selectedDate) {
+                  setDeadline(selectedDate);
+                }
+              }}
+            />
+          )}
+        </>
       )}
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -102,6 +121,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   checkboxLabel: {
+    fontSize: 16,
+    color: "#333",
+  },
+  dateButton: {
+    backgroundColor: "#f0f0f0",
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  dateButtonText: {
     fontSize: 16,
     color: "#333",
   },
