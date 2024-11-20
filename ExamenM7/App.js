@@ -4,13 +4,13 @@ import React, { useState, useEffect } from "react";
 
 // Importa les dependències de Firebase
 import { db } from './utils/firebaseConfig'; // Assegura't que la configuració de Firebase estigui correcta
-import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 // Importa les dependències de navegació
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-// Importa NovaTascaScreen
+// Importa NovaTascaScreen i EditTascaScreen
 import NovaTascaScreen from "./components/Screens/novaTascaScreen.js";
 import EditTascaScreen from "./components/Screens/editTascaScreen.js";
 
@@ -76,25 +76,6 @@ function HomeScreen({ navigation }) {
     );
   };
 
-  // Funció per afegir una nova tasca
-  const addTask = async (title, date) => {
-    try {
-      // Afegeix una nova tasca a Firestore
-      const docRef = await addDoc(collection(db, "ToDoList"), {
-        title,
-        date,
-        completed: false,
-      });
-      console.log("Tasca afegida correctament:", docRef.id);
-      setTasks((prevTasks) => [
-        ...prevTasks,
-        { id: docRef.id, title, date, completed: false },
-      ]);
-    } catch (error) {
-      console.error("Error afegint tasca:", error);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <FlatList
@@ -117,17 +98,24 @@ function HomeScreen({ navigation }) {
                 {item.date !== "Sense data limit" ? `${item.title} - ${item.date}` : item.title}
               </Text>
             </View>
-            <Button
-              title="Eliminar"
-              color="#ff4d4d"
-              onPress={() => handleDelete(item.id)}
-            />
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Editar"
+                color="#4CAF50"
+                onPress={() => navigation.navigate("EditTascaScreen", { task: item })}
+              />
+              <Button
+                title="Eliminar"
+                color="#ff4d4d"
+                onPress={() => handleDelete(item.id)}
+              />
+            </View>
           </View>
         )}
       />
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("NovaTascaScreen", { addTask })}
+        onPress={() => navigation.navigate("NovaTascaScreen")}
       >
         <Text style={styles.addButtonText}>+ Nova Tasca</Text>
       </TouchableOpacity>
@@ -219,5 +207,10 @@ const styles = StyleSheet.create({
   taskTitleCompleted: {
     textDecorationLine: "line-through",
     color: "#999",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: 150,
   },
 });

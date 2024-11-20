@@ -1,22 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { updateDoc, doc } from "firebase/firestore";
+import { db } from "../../utils/firebaseConfig"; // Subir un nivel para acceder a la carpeta utils
 
-export default function EditTascaSreen({ route, navigation }) {
-  const [title, setTitle] = useState("");
-  const [deadlineEnabled, setDeadlineEnabled] = useState(false);
-  const [deadline, setDeadline] = useState(null);
-  const [showPicker, setShowPicker] = useState(false); // Controla si es mostra el date picker
+export default function EditTascaScreen({ route, navigation }) {
+  const { task } = route.params; // Recibe la tarea seleccionada desde la pantalla principal
+  const [title, setTitle] = useState(task.title);
+  const [deadlineEnabled, setDeadlineEnabled] = useState(task.date !== "Sense data limit");
+  const [deadline, setDeadline] = useState(task.date !== "Sense data limit" ? new Date(task.date) : null);
+  const [showPicker, setShowPicker] = useState(false); // Controla si se muestra el date picker
 
-  const { addTask } = route.params;
-
-  const handleSave = () => {
+  // Guardar los cambios en Firebase
+  const handleSave = async () => {
     if (title.trim() === "" || (deadlineEnabled && !deadline)) {
       alert("Has d'omplir tots els camps necessaris");
       return;
     }
-    addTask(title, deadlineEnabled && deadline ? deadline.toLocaleDateString("ca-ES") : "Sense data limit");
-    navigation.goBack(); // Regresa a la pantalla anterior
+
+    const updatedTask = {
+      title,
+      date: deadlineEnabled && deadline ? deadline.toLocaleDateString("ca-ES") : "Sense data limit",
+      completed: task.completed, // Mantén el estado de completado
+    };
+
+    try {
+      // Actualiza la tarea en la colección "ToDoList" en lugar de "TodoList"
+      await updateDoc(doc(db, "ToDoList", task.id), updatedTask); 
+      navigation.goBack(); // Regresa a la pantalla anterior
+    } catch (error) {
+      console.error("Error actualizando tarea:", error);
+    }
   };
 
   return (
@@ -51,11 +65,11 @@ export default function EditTascaSreen({ route, navigation }) {
           </TouchableOpacity>
           {showPicker && (
             <DateTimePicker
-              value={deadline || new Date()} // Data actual per defecte
+              value={deadline || new Date()} // Fecha actual por defecto
               mode="date"
               display="default"
               onChange={(event, selectedDate) => {
-                setShowPicker(Platform.OS === "ios"); // Manté el picker o l'oculta
+                setShowPicker(Platform.OS === "ios"); // Mantén el picker o lo oculta
                 if (selectedDate) {
                   setDeadline(selectedDate);
                 }
@@ -81,22 +95,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     padding: 16,
-    alignItems: "center",
   },
   label: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
-    color: "#333",
   },
   input: {
-    width: "100%",
-    borderWidth: 1,
+    height: 40,
     borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
+    borderWidth: 1,
     marginBottom: 16,
-    fontSize: 16,
+    paddingLeft: 8,
+    borderRadius: 4,
   },
   checkboxContainer: {
     flexDirection: "row",
@@ -107,14 +118,14 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 4,
-    alignItems: "center",
+    borderColor: "#000",
+    marginRight: 12,
     justifyContent: "center",
-    marginRight: 8,
+    alignItems: "center",
+    borderRadius: 4,
   },
   checkboxChecked: {
-    backgroundColor: "#007BFF",
+    backgroundColor: "#4CAF50",
   },
   checkboxText: {
     color: "#fff",
@@ -122,46 +133,36 @@ const styles = StyleSheet.create({
   },
   checkboxLabel: {
     fontSize: 16,
-    color: "#333",
   },
   dateButton: {
+    paddingVertical: 8,
     backgroundColor: "#f0f0f0",
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    width: "100%",
-    alignItems: "center",
+    borderRadius: 4,
     marginBottom: 16,
   },
   dateButtonText: {
     fontSize: 16,
-    color: "#333",
+    color: "#007BFF",
   },
   saveButton: {
-    marginTop: 16,
     backgroundColor: "#007BFF",
     paddingVertical: 12,
-    paddingHorizontal: 32,
     borderRadius: 8,
+    marginBottom: 16,
   },
   saveButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    textAlign: "center",
   },
   backButton: {
-    position: "absolute",
-    bottom: 16,
-    left: 16,
-    backgroundColor: "#ccc",
+    backgroundColor: "#f0f0f0",
     paddingVertical: 12,
-    paddingHorizontal: 16,
     borderRadius: 8,
   },
   backButtonText: {
-    color: "#333",
+    color: "#007BFF",
     fontSize: 16,
-    fontWeight: "bold",
+    textAlign: "center",
   },
 });
