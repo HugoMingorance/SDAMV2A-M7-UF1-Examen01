@@ -12,6 +12,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // Importa NovaTascaScreen
 import NovaTascaScreen from "./components/Screens/novaTascaScreen.js";
+import EditTascaScreen from "./components/Screens/editTascaScreen.js";
 
 // Define el stack de navegació
 const Stack = createNativeStackNavigator();
@@ -108,19 +109,25 @@ function HomeScreen({ navigation }) {
             </TouchableOpacity>
             <View style={styles.taskDetails}>
               <Text
-                style={[
-                  styles.taskTitle,
-                  item.completed && styles.taskTitleCompleted,
-                ]}
+                style={[styles.taskTitle, item.completed && styles.taskTitleCompleted]}
               >
                 {item.date !== "Sense data limit" ? `${item.title} - ${item.date}` : item.title}
               </Text>
             </View>
-            <Button
-              title="Eliminar"
-              color="#ff4d4d"
-              onPress={() => handleDelete(item.id)}
-            />
+            <View style={styles.buttonContainer}>
+              {/* Botón de Editar en la izquierda */}
+              <Button
+                title="Editar"
+                color="#4CAF50"
+                onPress={() => navigation.navigate("EditTascaScreen", { task: item, updateTask: setTasks })}
+              />
+              {/* Botón de Eliminar a la derecha */}
+              <Button
+                title="Eliminar"
+                color="#ff4d4d"
+                onPress={() => handleDelete(item.id)}
+              />
+            </View>
           </View>
         )}
       />
@@ -148,6 +155,11 @@ export default function App() {
         <Stack.Screen
           name="NovaTascaScreen"
           component={NovaTascaScreen}
+          options={{ animation: 'none', headerShown: false }}
+        />
+        <Stack.Screen
+          name="EditTascaScreen"
+          component={EditTascaScreen}
           options={{ animation: 'none', headerShown: false }}
         />
       </Stack.Navigator>
@@ -214,4 +226,10 @@ const styles = StyleSheet.create({
     textDecorationLine: "line-through",
     color: "#999",
   },
+  buttonContainer: {
+    flexDirection: "row", // Alinea los botones en una fila
+    justifyContent: "space-between", // Espacio entre los botones
+    width: "45%", // Define el ancho para que los botones no ocupen toda la pantalla
+    marginTop: 8, // Añade un margen superior si es necesario
+  }
 });
