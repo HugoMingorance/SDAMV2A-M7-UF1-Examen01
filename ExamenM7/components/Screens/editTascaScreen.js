@@ -2,16 +2,15 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { updateDoc, doc } from "firebase/firestore";
-import { db } from "../../utils/firebaseConfig"; // Subir un nivel para acceder a la carpeta utils
+import { db } from "../../utils/firebaseConfig";
 
 export default function EditTascaScreen({ route, navigation }) {
-  const { task } = route.params; // Recibe la tarea seleccionada desde la pantalla principal
+  const { task } = route.params; 
   const [title, setTitle] = useState(task.title);
   const [deadlineEnabled, setDeadlineEnabled] = useState(task.date !== "Sense data limit");
   const [deadline, setDeadline] = useState(task.date !== "Sense data limit" ? new Date(task.date) : null);
-  const [showPicker, setShowPicker] = useState(false); // Controla si se muestra el date picker
+  const [showPicker, setShowPicker] = useState(false);
 
-  // Guardar los cambios en Firebase
   const handleSave = async () => {
     if (title.trim() === "" || (deadlineEnabled && !deadline)) {
       alert("Has d'omplir tots els camps necessaris");
@@ -21,13 +20,12 @@ export default function EditTascaScreen({ route, navigation }) {
     const updatedTask = {
       title,
       date: deadlineEnabled && deadline ? deadline.toLocaleDateString("ca-ES") : "Sense data limit",
-      completed: task.completed, // Mantén el estado de completado
+      completed: task.completed, 
     };
 
     try {
-      // Actualiza la tarea en la colección "ToDoList" en lugar de "TodoList"
       await updateDoc(doc(db, "ToDoList", task.id), updatedTask); 
-      navigation.goBack(); // Regresa a la pantalla anterior
+      navigation.goBack(); 
     } catch (error) {
       console.error("Error actualizando tarea:", error);
     }
@@ -65,11 +63,11 @@ export default function EditTascaScreen({ route, navigation }) {
           </TouchableOpacity>
           {showPicker && (
             <DateTimePicker
-              value={deadline || new Date()} // Fecha actual por defecto
+              value={deadline || new Date()} 
               mode="date"
               display="default"
               onChange={(event, selectedDate) => {
-                setShowPicker(Platform.OS === "ios"); // Mantén el picker o lo oculta
+                setShowPicker(Platform.OS === "ios"); 
                 if (selectedDate) {
                   setDeadline(selectedDate);
                 }
