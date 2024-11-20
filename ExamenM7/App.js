@@ -16,8 +16,6 @@ const Stack = createNativeStackNavigator();
 function HomeScreen({ navigation }) {
   const [tasks, setTasks] = useState([
     { id: "1", title: "ToDo1", date: "20/11/2024", completed: false },
-    { id: "2", title: "ToDo2", date: "21/11/2024", completed: false },
-    { id: "3", title: "ToDo3", date: "22/11/2024", completed: false },
   ]);
 
   // Elimina una tarea por su ID
@@ -70,8 +68,14 @@ function HomeScreen({ navigation }) {
               </Text>
             </TouchableOpacity>
             <View style={styles.taskDetails}>
-              <Text style={styles.taskTitle}>{item.title}</Text>
-              <Text style={styles.taskDate}>{item.date}</Text>
+              <Text
+                style={[
+                  styles.taskTitle,
+                  item.completed && styles.taskTitleCompleted,
+                ]}
+              >
+                {item.date !== "Sense data limit" ? `${item.title} - ${item.date}` : item.title}
+              </Text>
             </View>
             <Button
               title="Eliminar"
@@ -168,6 +172,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  taskTitleCompleted: {
+    textDecorationLine: "line-through",
+    color: "#999",
   },
 });
 
