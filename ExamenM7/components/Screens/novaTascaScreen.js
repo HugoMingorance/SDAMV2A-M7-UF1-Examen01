@@ -13,7 +13,7 @@ export default function NovaTascaScreen({ route, navigation }) {
       alert("Has d'omplir tots els camps necessaris");
       return;
     }
-    addTask(title, deadlineEnabled ? deadline : "No definida");
+    addTask(title, deadlineEnabled ? deadline : "Sense data limit");
     navigation.goBack(); // Regresa a la pantalla anterior
   };
 
