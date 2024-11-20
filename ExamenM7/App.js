@@ -1,43 +1,42 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, Button, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
-
-// Importa les dependències de Firebase
 import { db } from './utils/firebaseConfig'; // Assegura't que la configuració de Firebase estigui correcta
 import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
-
-// Importa les dependències de navegació
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useFocusEffect } from '@react-navigation/native'; // Afegit per actualitzar les tasques quan la pantalla rep el focus
 
-// Importa NovaTascaScreen
+// Importa NovaTascaScreen i EditTascaScreen
 import NovaTascaScreen from "./components/Screens/novaTascaScreen.js";
 import EditTascaScreen from "./components/Screens/editTascaScreen.js";
 
 // Define el stack de navegació
 const Stack = createNativeStackNavigator();
 
-// Pantalla inicial (HomeScreen)
 function HomeScreen({ navigation }) {
   const [tasks, setTasks] = useState([]);
 
   // Recuperar tasques de Firestore
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "ToDoList"));
-        const tasksList = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setTasks(tasksList);
-      } catch (error) {
-        console.error("Error recuperant tasques:", error);
-      }
-    };
+  const fetchTasks = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "ToDoList"));
+      const tasksList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTasks(tasksList);
+    } catch (error) {
+      console.error("Error recuperant tasques:", error);
+    }
+  };
 
-    fetchTasks();
-  }, []);
+  // Carregar les tasques quan la pantalla rep el focus
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchTasks();
+    }, [])
+  );
 
   // Elimina una tasca per la seva ID
   const handleDelete = (id) => {
@@ -79,7 +78,6 @@ function HomeScreen({ navigation }) {
   // Funció per afegir una nova tasca
   const addTask = async (title, date) => {
     try {
-      // Afegeix una nova tasca a Firestore
       const docRef = await addDoc(collection(db, "ToDoList"), {
         title,
         date,
