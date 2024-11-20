@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-native";
 
 export default function NovaTascaScreen({ route, navigation }) {
   const [title, setTitle] = useState("");
@@ -48,6 +48,10 @@ export default function NovaTascaScreen({ route, navigation }) {
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Guardar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.backButtonText}>Tornar Enrere</Text>
       </TouchableOpacity>
     </View>
   );
@@ -110,6 +114,20 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  backButton: {
+    position: "absolute",
+    bottom: 16,
+    left: 16,
+    backgroundColor: "#ccc",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: "#333",
     fontSize: 16,
     fontWeight: "bold",
   },
