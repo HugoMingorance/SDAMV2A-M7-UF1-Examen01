@@ -115,13 +115,11 @@ function HomeScreen({ navigation }) {
               </Text>
             </View>
             <View style={styles.buttonContainer}>
-              {/* Botón de Editar en la izquierda */}
               <Button
                 title="Editar"
                 color="#4CAF50"
                 onPress={() => navigation.navigate("EditTascaScreen", { task: item, updateTask: setTasks })}
               />
-              {/* Botón de Eliminar a la derecha */}
               <Button
                 title="Eliminar"
                 color="#ff4d4d"
@@ -227,9 +225,9 @@ const styles = StyleSheet.create({
     color: "#999",
   },
   buttonContainer: {
-    flexDirection: "row", // Alinea los botones en una fila
-    justifyContent: "space-between", // Espacio entre los botones
-    width: "45%", // Define el ancho para que los botones no ocupen toda la pantalla
-    marginTop: 8, // Añade un margen superior si es necesario
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    width: "45%", 
+    marginTop: 8, 
   }
 });
